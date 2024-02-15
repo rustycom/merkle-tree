@@ -1,6 +1,6 @@
 use sha3::{Digest, Sha3_256};
 
-pub fn hash_string_sha3(input: String) -> String {
+pub fn hash_string_sha3(input: &String) -> String {
     // Create a new SHA-3 hasher
     let mut hasher = Sha3_256::new();
     // Update the hasher with the input string

@@ -6,8 +6,8 @@ pub struct MerkelTree {
 }
 
 impl MerkelTree {
-    pub fn new() -> MerkelTree {
-        Self::default()
+    pub fn new(depth:u32, initial_leaf: String) -> MerkelTree {
+        Self::merkel_tree(depth, initial_leaf)
     }
 
     pub fn get_index(depth:u32, offset:u32) -> u32 {
@@ -29,28 +29,19 @@ impl MerkelTree {
         return Self::get_index(depth - 1, offset/2);
     }
 
-    pub fn get_left_child(index: u32) ->u32 {
+    fn get_left_child(index: u32) ->u32 {
         let (depth , offset) = Self::get_depth_and_offset(index);
         return Self::get_index(depth + 1, offset *2); 
     }
     
-    pub fn merkel_tree(depth:u32, initial_leaf: String) -> MerkelTree {
-        let mut node = hash_string_sha3(initial_leaf);
+    fn merkel_tree(depth:u32, initial_leaf: String) -> MerkelTree {
+        let mut node = hash_string_sha3(&initial_leaf);
         let mut tree: MerkelTree = Default::default();
-        let n = depth;
-        let mut layer: Vec<String> = vec![];
-        for _i in 0..2u32.pow(n){
-            layer.push(node.clone());
-        }
+        let layer: Vec<String> = vec![node.clone(); 2u32.pow(depth) as usize];
         tree.layers.push(layer);
-        for i in (0..n).rev() {
-            let mut layer: Vec<String> = vec![];
-            let str = format!("{}{}", node, node);
-            let leaf = hash_string_sha3(str);
-            node = leaf;
-            for _m in 0..2u32.pow(i){
-                layer.push(node.clone());
-            }
+        for i in (0..depth).rev() {
+            node = hash_string_sha3(&format!("{}{}", node, node));
+            let layer: Vec<String> = vec![node.clone(); 2u32.pow(i) as usize];
             tree.layers.push(layer); 
         }
         tree
@@ -58,7 +49,7 @@ impl MerkelTree {
     
     pub fn set(depth:u32, offset:u32, mtree:MerkelTree, leaf:String) -> MerkelTree{
         let mut tree = mtree;
-        let mut recacl_node = hash_string_sha3(leaf);
+        let mut recacl_node = hash_string_sha3(&leaf);
         let mut child_offset = offset;
         for n in (0..(depth+1)).rev() {
             tree.layers[(depth-n) as usize][child_offset as usize] = recacl_node.clone();
@@ -68,7 +59,7 @@ impl MerkelTree {
                 let (_d1, o1) = Self::get_depth_and_offset(parent_index);
                 child_offset = o1;
                 let str = format!("{}{}", tree.layers[(depth - n)as usize][(o1*2) as usize], tree.layers[(depth - n)as usize][(o1*2 + 1) as usize] );
-                let new_node = hash_string_sha3(str);
+                let new_node = hash_string_sha3(&str);
                 recacl_node = new_node;
             }
         }
@@ -95,15 +86,13 @@ impl MerkelTree {
     }
     
     pub fn verify(leaf: String, proof: Vec<String>) -> String{
-        let mut initial_leaf =  hash_string_sha3(leaf);
+        let mut initial_leaf =  hash_string_sha3(&leaf);
         let len = proof.len();
         for i in 0..len {
             let str = format!("{}{}", proof[i], proof[i]);
-            let node = hash_string_sha3(str);
+            let node = hash_string_sha3(&str);
             initial_leaf = node;
         }
-    
         initial_leaf
-    
     }
 }
