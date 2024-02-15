@@ -11,11 +11,11 @@ impl MerkelTree {
     }
 
     pub fn get_index(depth:u32, offset:u32) -> u32 {
-        let mut index = 0;
         if depth > 0 {
-            index = (1 << depth) + offset - 1;
+            (1 << depth) + offset - 1
+        }else {
+            0
         }
-        index
     }
 
     pub fn get_depth_and_offset(index:u32) -> (u32, u32) {
@@ -26,12 +26,12 @@ impl MerkelTree {
     
     pub fn get_parent_index(index: u32) -> u32 {
         let (depth , offset) = Self::get_depth_and_offset(index);
-        return Self::get_index(depth - 1, offset/2);
+        Self::get_index(depth - 1, offset/2)
     }
 
     fn get_left_child(index: u32) ->u32 {
         let (depth , offset) = Self::get_depth_and_offset(index);
-        return Self::get_index(depth + 1, offset *2); 
+        Self::get_index(depth + 1, offset *2)
     }
     
     fn merkel_tree(depth:u32, initial_leaf: String) -> MerkelTree {
