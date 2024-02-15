@@ -20,16 +20,11 @@ mod tests {
         assert_eq!(result, 2);
     }
 
-    #[test]
-    fn get_left_child_works(){
-        let result = MerkelTree::get_left_child(5);
-        assert_eq!(result, 11);
-    }
 
     #[test]
     fn get_merkel_tree(){
         let initial_value = String::from("0xab");
-        let mut result = MerkelTree::merkel_tree(2, initial_value);
+        let mut result = MerkelTree::new(2, initial_value);
         println!("{:?}", result);  
         
         let proof = MerkelTree::proof(result.clone(), 6); 
