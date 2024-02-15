@@ -13,14 +13,14 @@ impl MerkelTree {
     pub fn get_index(depth:u32, offset:u32) -> u32 {
         let mut index = 0;
         if depth > 0 {
-            index = 2u32.pow(depth) + offset - 1;
+            index = (1 << depth) + offset - 1;
         }
         index
     }
 
     pub fn get_depth_and_offset(index:u32) -> (u32, u32) {
         let depth = (index + 1).ilog2();
-        let offset = index + 1 - 2u32.pow(depth);
+        let offset = index + 1 - (1 << depth);
         (depth , offset)
     }
     
@@ -36,13 +36,13 @@ impl MerkelTree {
     
     fn merkel_tree(depth:u32, initial_leaf: String) -> MerkelTree {
         let mut node = hash_string_sha3(&initial_leaf);
-        let mut tree: MerkelTree = Default::default();
-        let layer: Vec<String> = vec![node.clone(); 2u32.pow(depth) as usize];
+        let mut tree: MerkelTree = MerkelTree::default();
+        let layer: Vec<String> = vec![node.clone(); 1 << depth as usize];
         tree.layers.push(layer);
         for i in (0..depth).rev() {
             node = hash_string_sha3(&format!("{}{}", node, node));
-            let layer: Vec<String> = vec![node.clone(); 2u32.pow(i) as usize];
-            tree.layers.push(layer); 
+            let layer: Vec<String> = vec![node.clone(); 1 << i as usize];
+            tree.layers.push(layer);
         }
         tree
     }
